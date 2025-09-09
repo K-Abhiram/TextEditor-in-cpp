@@ -2,7 +2,7 @@
 This is my personal project based on a Text Editor, made in C++
 
 
-**##Features(so far)**
+## Features(so far)
 - Minimal console-based text editor in C++.
 - Create/open file
 - Append text
