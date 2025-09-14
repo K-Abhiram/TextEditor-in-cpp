@@ -20,21 +20,22 @@ void dispFile(const string &filename){
     }
     string line;
     bool isThere=false;
-    cout<<"----------File contents -----------"<<endl;
+    int linenum=1;
+    cout<<"\n\n----------File contents -----------"<<endl;
     while(getline(file,line)){
-        cout<<line<<endl;
+        cout<<linenum++<<": "<<line<<endl;
         isThere = true;
     }
     if(isThere==false){
         cout<<"File is empty"<<endl;
     }
-    cout<<"-------------------------------------"<<endl;
+    cout<<"-------------------------------------\n\n"<<endl;
     file.close();
 }
 vector<string> ReadMultipleInput(){
     //Creates a function to read inputs and append into a vector, exit from vector if /end is used
     vector<string> lines;
-    cout<<"Enter text. Type /end on a new line to finish"<<endl;
+    cout<<"\n\nEnter text. Type /end on a new line to finish"<<endl;
     string line;
     while(true){
         if(!getline(cin,line)){
@@ -80,6 +81,44 @@ void overwriteFile(const string &filename){
     }
     cout<<"File overwritten with "<<lines.size()<<" lines(s)\n";
 }
+
+void deleteLine(const string &filename){
+    ifstream file(filename);
+    if(!file){
+        cout<<"Error: could not open file"<<endl;
+        return;
+
+    }
+    vector<string> lines;
+    string line;
+    while(getline(file,line)){
+        lines.push_back(line);
+    }
+    file.close();
+
+    if(lines.empty()){
+        cout<<"File is empty"<<endl;
+        return;
+    }
+
+    cout<<"Enter the line number you wish to delete: 1-"<<lines.size()<<"\n";
+    int x;
+    cin>>x;
+
+    if(x<1 || x>(int)lines.size()){
+        cout<<"Invalid numbers";
+        cin.ignore(numeric_limits<streamsize>::max(),'\n'); //clears buffer
+        return;
+    }
+    ofstream out(filename,ios::trunc);
+    for(int i=0;i<(int)lines.size();i++){
+        if(i+1 != x){
+            out<<lines[i]<<endl;
+        }
+    }
+    out.close();
+    cout<<"Line "<<x<<" deleted successfully";
+}
 int main(){
     string filename;
     cout<<"Enter the file name you wish to use: \n";
@@ -94,8 +133,9 @@ int main(){
         cout<<"1: Display file contents\n";
         cout<<"2: Append text into a file\n";
         cout<<"3: Overwrite exising file completely\n";
-        cout<<"4: Exit program\n";
-        cout<<"Choose option between 1-4: \n";
+        cout<<"4: Delete line\n";
+        cout<<"5: Exit program\n";
+        cout<<"Choose option between 1-5: \n";
         
         int x;
         //cin>>x;
@@ -118,6 +158,9 @@ int main(){
                 overwriteFile(filename);
                 break;
             case 4:
+                deleteLine(filename);
+                break;
+            case 5:
                 cout<<"Exiting program\n";
                 return 0;
             default:
