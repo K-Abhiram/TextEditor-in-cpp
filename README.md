@@ -8,8 +8,9 @@ This is my personal project based on a Text Editor, made in C++
 - Create/open file
 - Append text
 - Overwrite text file entirely and Append new text
+- Delete any line of code based on the line number
 - Save & close
-- Display text file
+- Display text file with each line numbered
 
 ## Usage
 Run the program, enter filename, type text, end with `/end`.
