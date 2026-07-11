@@ -1,6 +1,13 @@
 # Prerequisites
 *.d
 
+# My local test files
+arko.txt
+test.txt
+hello
+
+# Executables
+*.exe
 # Compiled Object files
 *.slo
 *.lo
