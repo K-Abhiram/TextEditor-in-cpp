@@ -12,6 +12,30 @@ void fileExists(const string &filename){
     }
 }
 
+//helper function to open and load a file, created to save space where multiple functions require file to be opened
+vector<string> loadFile(const string &filename){
+    vector<string> lines;
+    ifstream file(filename);
+    string line;
+    while(getline(file,line)){
+        lines.push_back(line);
+    }
+
+    file.close();
+    return lines;
+}
+
+
+//helper function to save contents into the designated file.
+void saveFile(const string &filename, const vector<string> &lines){
+    ofstream file(filename,ios::trunc);
+    for(const auto &line:lines){
+        file<<line<<endl;
+    }
+    file.close();
+}
+
+
 void dispFile(const string &filename){
     ifstream file(filename); //ifstream is used to open a file in read mode, fails if the file is empty 
     if(!file){
@@ -83,41 +107,83 @@ void overwriteFile(const string &filename){
 }
 
 void deleteLine(const string &filename){
-    ifstream file(filename);
-    if(!file){
-        cout<<"Error: could not open file"<<endl;
-        return;
-
-    }
-    vector<string> lines;
-    string line;
-    while(getline(file,line)){
-        lines.push_back(line);
-    }
-    file.close();
-
+    vector<string> lines = loadFile(filename);
     if(lines.empty()){
-        cout<<"File is empty"<<endl;
+        cout<<"File is empty."<<endl;
+        return;
+    } 
+
+    cout<<"Enter the line number to delete (1-"<<lines.size()<<"): ";
+
+    int linenum;
+    cin>>linenum;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+
+    if(linenum<1 || linenum > (int)lines.size()){
+        cout<<"Invalid line number."<<endl;
         return;
     }
 
-    cout<<"Enter the line number you wish to delete: 1-"<<lines.size()<<"\n";
-    int x;
-    cin>>x;
+    lines.erase(lines.begin()+linenum-1);
+    saveFile(filename,lines);
 
-    if(x<1 || x>(int)lines.size()){
-        cout<<"Invalid numbers";
-        cin.ignore(numeric_limits<streamsize>::max(),'\n'); //clears buffer
+    cout<<"Line deleted successfully."<<endl;
+}
+
+//function to edit a line from the file and save the contents after editing
+void editLine(const string&filename){
+    vector<string> lines = loadFile(filename);
+    if(lines.empty()){
+        cout<<"File is empty."<<endl;
         return;
     }
-    ofstream out(filename,ios::trunc);
-    for(int i=0;i<(int)lines.size();i++){
-        if(i+1 != x){
-            out<<lines[i]<<endl;
-        }
+
+    cout<<"Enter the line you wish to edit (1-"<<lines.size()<<"): ";
+
+    int linenum;
+    cin>>linenum;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+
+    if(linenum<1 || linenum > (int)lines.size()){
+        cout<<"Invalid line number."<<endl;
+        return;
     }
-    out.close();
-    cout<<"Line "<<x<<" deleted successfully";
+
+    cout<<"Current text in line"<<endl;
+    cout<<lines[linenum-1]<<endl;
+    
+    cout<<"Enter new text"<<endl;
+    string newText;
+    getline(cin,newText);
+
+    lines[linenum-1]=newText;
+    saveFile(filename,lines);
+
+    cout<<"Line updated successfully."<<endl;
+}
+
+//function to insert a new line of text to existing file.
+void insertLine(const string &filename){
+    vector<string> lines = loadFile(filename);
+    cout<<"Enter position to insert (1-"<<lines.size()+1<<"): ";
+
+    int pos;
+    cin>>pos;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+
+    if(pos<1 || pos>(int)lines.size()+1){
+        cout<<"Invalid position."<<endl;
+        return;
+    }
+
+    cout<<"Enter text: \n";
+    string newLine;
+    getline(cin,newLine);
+
+    lines.insert(lines.begin()+pos-1,newLine);
+
+    saveFile(filename,lines);
+    cout<<"Line inserted successfully."<<endl;
 }
 int main(){
     string filename;
@@ -134,13 +200,16 @@ int main(){
         cout<<"2: Append text into a file\n";
         cout<<"3: Overwrite exising file completely\n";
         cout<<"4: Delete line\n";
-        cout<<"5: Exit program\n";
-        cout<<"Choose option between 1-5: \n";
+        cout<<"5: Edit line\n";
+        cout<<"6: Insert line\n";
+        cout<<"7: Exit program\n";
+
+        cout<<"Choose option between 1-7: \n";
         
         int x;
         //cin>>x;
         if(!(cin>>x)){
-            cout<<"Invalid input. Please enter a number between 1 and 4\n";
+            cout<<"Invalid input. Please enter a number between 1 and 7\n";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(),'\n'); //ignore everything until the newline character \n
             continue;
@@ -161,10 +230,16 @@ int main(){
                 deleteLine(filename);
                 break;
             case 5:
+                editLine(filename);
+                break;
+            case 6:
+                insertLine(filename);
+                break;
+            case 7:
                 cout<<"Exiting program\n";
                 return 0;
             default:
-                cout<<"Invalid choice. Choose between 1-4\n";
+                cout<<"Invalid choice. Choose between 1-7\n";
         }
     }
 }
