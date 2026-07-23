@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <sstream>
 using namespace std;
 
 void fileExists(const string &filename){
@@ -149,6 +150,7 @@ void editLine(const string&filename){
     cout<<"Line updated successfully."<<endl;
 }
 
+//searches for a given keyword in the file and returns the line number consisting of the keyword
 void searchText(const string& filename){
     vector<string> lines = loadFile(filename);
     if(fileEmpty(lines)){
@@ -178,6 +180,64 @@ void searchText(const string& filename){
     cout<<"====================\n";
 }
 
+//Display statistics like line count, word count and character count of the file.
+void fileStatistics(const string &filename){
+    vector<string> lines = loadFile(filename);
+    if(fileEmpty(lines)){
+        cout<<"File is empty.\n";
+        return;
+    }
+    int totalLines = lines.size();
+    int totalWords = 0;
+    int totalCharacters = 0;
+
+    for(const auto &line: lines){
+        totalCharacters += line.length();
+        stringstream ss(line);
+        string word;
+
+        while(ss>>word){
+            totalWords++;
+        }
+    }
+
+    cout<<"========== FILE STATISTICS ===========\n";
+
+    cout<<"Total lines\t: "<<totalLines<<endl;
+    cout<<"Total words\t: "<<totalWords<<endl;
+    cout<<"Total characters\t: "<<totalCharacters<<endl;
+
+    cout<<"====================\n";
+
+}
+
+//find keyword in file and replace it with another word in a file.
+void findAndReplace(const string& filename){
+    vector<string> lines = loadFile(filename);
+    if(fileEmpty(lines)){
+        cout<<"File is empty.\n";
+        return;
+    }
+
+    string findText, replaceText;
+    cout<<"Enter text to find: ";
+    getline(cin,findText);
+
+    cout<<"Enter replacement text: ";
+    getline(cin, replaceText);
+
+    int replacements = 0;
+    for(auto &line: lines){
+        size_t pos = 0;
+        while((pos=line.find(findText,pos))!=string::npos){
+            line.replace(pos,findText.length(),replaceText);
+            pos += replaceText.length();
+            replacements++;
+        }
+    }
+    saveFile(filename,lines);
+    cout<<"\n"<<replacements<<" occurance(s) replaced\n";
+}
 //function to insert a new line of text to existing file.
 void insertLine(const string &filename){
     vector<string> lines = loadFile(filename);
@@ -219,9 +279,11 @@ int main(){
         cout<<"5: Edit line\n";
         cout<<"6: Insert line\n";
         cout<<"7: Search Text in File\n";
-        cout<<"8: Exit program\n";
+        cout<<"8: Display file statistics\n";
+        cout<<"9: Find & Replace\n";
+        cout<<"10: Exit program\n";
 
-        cout<<"Choose option between 1-8: \n";
+        cout<<"Choose option between 1-10: \n";
         
         int x;
         //cin>>x;
@@ -256,6 +318,12 @@ int main(){
                 searchText(filename);
                 break;
             case 8:
+                fileStatistics(filename);
+                break;
+            case 9:
+                findAndReplace(filename);
+                break;
+            case 10:
                 cout<<"Exiting program\n";
                 return 0;
             default:
