@@ -35,28 +35,23 @@ void saveFile(const string &filename, const vector<string> &lines){
     file.close();
 }
 
-
+//helper function to check whether a file is empty or not.
+bool fileEmpty(const vector<string> &lines){
+    return lines.empty();
+}
 void dispFile(const string &filename){
-    ifstream file(filename); //ifstream is used to open a file in read mode, fails if the file is empty 
-    if(!file){
-        cout<<"Could not open file"<<endl;
+    vector<string> lines = loadFile(filename);
+    if(lines.empty()){
+        cout<<"File is empty."<<endl;
         return;
     }
-    string line;
-    bool isThere=false;
-    int linenum=1;
-    cout<<"\n\n----------File contents -----------"<<endl;
-    while(getline(file,line)){
-        cout<<linenum++<<": "<<line<<endl;
-        isThere = true;
+
+    cout<<"\nDisplaying contents of file: "<<filename<<endl<<endl;
+    for(int i=0;i<lines.size();i++){
+        cout<<i+1<<": "<<lines[i]<<endl; 
     }
-    if(isThere==false){
-        cout<<"File is empty"<<endl;
-    }
-    cout<<"-------------------------------------\n\n"<<endl;
-    file.close();
 }
-vector<string> ReadMultipleInput(){
+vector<string> readMultipleInput(){
     //Creates a function to read inputs and append into a vector, exit from vector if /end is used
     vector<string> lines;
     cout<<"\n\nEnter text. Type /end on a new line to finish"<<endl;
@@ -72,17 +67,16 @@ vector<string> ReadMultipleInput(){
     }
     return lines;
 }
+
+//function to add more lines to a file.
 void appendToFile(const string &filename){
-    ofstream file(filename, ios::app); //opens a output stream file in append only mode
-    if(!file){
-        cout<<"Error: cannot open file for editing"<<endl;
-        return;
+    vector<string> fileContents = loadFile(filename);
+    vector<string> newLines = readMultipleInput();
+    for(const auto &line:newLines){
+        fileContents.push_back(line);
     }
-    vector<string> lines = ReadMultipleInput();
-    for(const auto &l:lines){ //append each datatype(auto in this case is String) to the vector
-        file<<l<<endl;
-    }
-    cout<<"Appended "<<lines.size()<<" line(s) to text file";
+    saveFile(filename,fileContents);
+    cout<<"Appended "<<newLines.size()<<" line(s) to file.\n"<<endl;
 }
 
 void overwriteFile(const string &filename){
@@ -94,16 +88,9 @@ void overwriteFile(const string &filename){
         cout<<"Overwrite aborted\n";
         return;
     }
-    ofstream file(filename,ios::trunc); // trunc stands for truncate, clears the existing file
-    if(!file){
-        cout<<"Error: cannot open file\n";
-        return;
-    }
-    vector<string> lines = ReadMultipleInput();
-    for(const auto &l:lines){
-        file<<l<<endl;
-    }
-    cout<<"File overwritten with "<<lines.size()<<" lines(s)\n";
+    vector<string> newLines = readMultipleInput();
+    saveFile(filename,newLines);
+    cout<<"File succesfully overwritten.\n"<<endl;
 }
 
 void deleteLine(const string &filename){
@@ -162,6 +149,35 @@ void editLine(const string&filename){
     cout<<"Line updated successfully."<<endl;
 }
 
+void searchText(const string& filename){
+    vector<string> lines = loadFile(filename);
+    if(fileEmpty(lines)){
+        cout<<"File is empty.\n"<<endl;
+        return;
+    }
+    string keyword;
+    cout<<"Enter text to search: ";
+    getline(cin,keyword);
+
+    bool found=false;
+    int matches=0;
+
+    cout<<"\n==========Search Results==========\n";
+    for(int i=0;i<(int)lines.size();i++){
+        if(lines[i].find(keyword)!=string::npos){
+            cout<<"Lines "<<i+1<<": "<<lines[i]<<endl;
+            found = true;
+            matches++;
+        }
+    }
+
+    if(!found){
+        cout<<"No matches found."<<endl;
+    }
+    else cout<<"\nTotal Matches: "<<matches<<endl;
+    cout<<"====================\n";
+}
+
 //function to insert a new line of text to existing file.
 void insertLine(const string &filename){
     vector<string> lines = loadFile(filename);
@@ -202,9 +218,10 @@ int main(){
         cout<<"4: Delete line\n";
         cout<<"5: Edit line\n";
         cout<<"6: Insert line\n";
-        cout<<"7: Exit program\n";
+        cout<<"7: Search Text in File\n";
+        cout<<"8: Exit program\n";
 
-        cout<<"Choose option between 1-7: \n";
+        cout<<"Choose option between 1-8: \n";
         
         int x;
         //cin>>x;
@@ -235,11 +252,14 @@ int main(){
             case 6:
                 insertLine(filename);
                 break;
-            case 7:
+            case 7: 
+                searchText(filename);
+                break;
+            case 8:
                 cout<<"Exiting program\n";
                 return 0;
             default:
-                cout<<"Invalid choice. Choose between 1-7\n";
+                cout<<"Invalid choice. Choose between 1-8\n";
         }
     }
 }
